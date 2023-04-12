@@ -12,7 +12,7 @@ public class DataBaseConnection {
 
 	public static ResultSet setConnection(String query) {
 		try {
-			Connection con = DriverManager.getConnection(connectionString, "root", "Kevin@143");
+			Connection con = DriverManager.getConnection(connectionString, "root", "password");
 			System.out.println("connection established");
 			Statement statement = con.createStatement();
 			ResultSet resultSet = statement.executeQuery(query);
