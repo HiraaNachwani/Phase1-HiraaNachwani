@@ -1,4 +1,4 @@
-package pageClass;
+package commonClass;
 
 import org.openqa.selenium.WebDriver;
 

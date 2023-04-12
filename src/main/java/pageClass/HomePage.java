@@ -1,13 +1,18 @@
 package pageClass;
 
-import java.util.Iterator;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
-
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.FindBys;
 import org.openqa.selenium.support.How;
+
+import commonClass.BasePage;
+import dev.failsafe.internal.util.Assert;
+import pageObjects.HomePageObjects;
+import utilities.DataBaseConnection;
 
 public class HomePage extends BasePage {
 
@@ -15,35 +20,92 @@ public class HomePage extends BasePage {
 		super(driver);
 	}
 
-	@FindBy(id = "twotabsearchtextbox")
+	@FindBy(id = HomePageObjects.TXT_SEARCH_BOX)
 	WebElement txtSearch;
 
-	@FindBy(how = How.ID, using = "nav-search-submit-button")
+	@FindBy(how = How.ID, using = HomePageObjects.BTN_SUBMIT)
 	WebElement btnSubmit;
 
-	@FindBys(@FindBy(xpath = "//h2[@class='a-size-mini a-spacing-none a-color-base s-line-clamp-2']/a/span"))
+	@FindBys(@FindBy(xpath = HomePageObjects.HDG_PRODUCTS))
 	List<WebElement> txtProductList;
 
+	/*
+	 * this method is used to setText in search box
+	 */
 	public void setSearchText(String text) {
 		txtSearch.sendKeys(text);
 	}
 
+	/*
+	 * this method is used to click submit button
+	 */
 	public void clickSubmitButton() {
 		btnSubmit.click();
 	}
 
-	public void getSearchResultProductList() {
+	/*
+	 * this method is used to assert list of product name
+	 */
+	public void verifyWithAssertSearchResultProductList(String query, String columnName) {
 
 		System.out.println("Number of Products in Search Result: " + txtProductList.size());
-
+		ResultSet result = DataBaseConnection.setConnection(query);
 		for (int i = 0; i < txtProductList.size(); i++) {
-			System.out.println("Product Name: " + txtProductList.get(i).getText());
+			try {
+
+				result.next();
+				System.out.println("Actual : " + txtProductList.get(i).getText());
+				System.out.println("Expected : " + result.getString(columnName));
+
+				Assert.isTrue(result.getString(columnName).equals(txtProductList.get(i).getText()),
+						"Product " + i + " didn't match");
+
+				System.out.println(columnName + " " + (i + 1) + " Matched Successfully ");
+				System.out.println("*********");
+
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
-	public void sleep() {
+	/*
+	 * this method is used to compare list of product name
+	 */
+	public void verifySearchResultProductList(String query, String columnName) {
+
+		System.out.println("Number of Products in Search Result: " + txtProductList.size());
+		ResultSet result = DataBaseConnection.setConnection(query);
+		for (int i = 0; i < txtProductList.size(); i++) {
+			try {
+
+				result.next();
+				System.out.println("Actual : " + txtProductList.get(i).getText());
+				System.out.println("Expected : " + result.getString(columnName));
+
+				if (txtProductList.get(i).getText().equals(result.getString(columnName))) {
+					System.out.println(columnName + " " + (i + 1) + " Matched ");
+				} else {
+					System.out.println(columnName + " " + (i + 1) + " Not Matched ");
+				}
+
+				System.out.println("*********");
+
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/*
+	 * this method is used to hold execution for provided time in millisecond as
+	 * parameter
+	 */
+	public void sleep(int time) {
 		try {
-			Thread.sleep(5000);
+			Thread.sleep(time);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
